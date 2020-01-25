@@ -70,7 +70,7 @@ func (hr *hashRatchet) Next() (uint32, keyAndNonce) {
 
 func (hr *hashRatchet) Get(generation uint32) (keyAndNonce, error) {
 	if kn, ok := hr.Cache[generation]; ok {
-		return kn, nil
+		return kn.clone(hr.Suite), nil
 	}
 
 	if hr.NextGeneration > generation {

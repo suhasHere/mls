@@ -735,7 +735,6 @@ func (s *State) decrypt(ct *MLSCiphertext) (*MLSPlaintext, error) {
 		ct.AuthenticatedData, ct.SenderDataNonce, ct.EncryptedSenderData)
 
 	aead, _ := s.CipherSuite.newAEAD(keys.Key)
-
 	content, err := aead.Open(nil, keys.Nonce, ct.Ciphertext, aad)
 	if err != nil {
 		return nil, fmt.Errorf("mls.state: content decryption failure %v", err)
@@ -851,7 +850,7 @@ func (s State) clone() *State {
 	// reference copies.
 	clone := &State{
 		CipherSuite:             s.CipherSuite,
-		GroupID:                 s.GroupID,
+		GroupID:                 make([]byte, len(s.GroupID)),
 		Epoch:                   s.Epoch,
 		Tree:                    *s.Tree.clone(),
 		ConfirmedTranscriptHash: nil,

@@ -3,6 +3,7 @@ package mls
 import (
 	"bytes"
 	"fmt"
+	"github.com/bifurcation/mint/syntax"
 )
 
 type Session struct {
@@ -158,7 +159,7 @@ func (s *Session) Handle(message []byte) error {
 	} else {
 		proposal = new(MLSPlaintext)
 		commit = new(MLSPlaintext)
-		_, err := r.ReadAll(proposal)
+		_, err := r.ReadAll(proposal, commit)
 		if err != nil {
 			panic(err)
 			return err
@@ -197,11 +198,28 @@ func (s *Session) Handle(message []byte) error {
 }
 
 func (s *Session) Protect(plaintext []byte) ([]byte, error) {
-	// TODO
-	return nil, nil
+	mlsCipherText, err := s.currentState().protect(plaintext)
+	if err != nil {
+		return nil, err
+	}
+	enc, err := syntax.Marshal(mlsCipherText)
+	if err != nil {
+		return nil, err
+	}
+	return enc, nil
 }
 
 func (s *Session) Unprotect(ciphertext []byte) ([]byte, error) {
-	// TODO
-	return nil, nil
+	var mlsCipherText MLSCiphertext
+	_, err := syntax.Unmarshal(ciphertext, &mlsCipherText)
+	if err != nil {
+		return nil, err
+	}
+
+	pt, err := s.currentState().unprotect(&mlsCipherText)
+	if err != nil {
+		return nil, err
+	}
+
+	return pt, nil
 }
